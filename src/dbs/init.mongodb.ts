@@ -1,6 +1,9 @@
 "use strict";
 
 import mongoose from "mongoose";
+import configMongodb from "../configs/config.mongodb";
+
+const { db } = configMongodb;
 
 // Singleton class
 class Database {
@@ -11,12 +14,9 @@ class Database {
 
   connect(type: string = "mongodb") {
     mongoose
-      .connect(
-        "mongodb+srv://quocan142536:Ta123456@cluster0.emuywiy.mongodb.net/nestjs-basic?retryWrites=true&w=majority",
-        {
-          maxPoolSize: 50,
-        }
-      )
+      .connect(db.url, {
+        maxPoolSize: 50,
+      })
       .then(() => {
         console.log("Database connection successful");
       })

@@ -1,5 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 const dev = {
-  app: {
+  server: {
     port: process.env.DEV_PORT,
   },
   db: {
@@ -8,7 +11,7 @@ const dev = {
 };
 
 const pro = {
-  app: {
+  server: {
     port: process.env.PRO_PORT,
   },
   db: {
@@ -18,4 +21,5 @@ const pro = {
 
 const config: { [key: string]: typeof dev | typeof pro } = { dev, pro };
 const env: "dev" | "pro" = (process.env.NODE_ENV as "dev" | "pro") || "dev";
+
 export default config[env];

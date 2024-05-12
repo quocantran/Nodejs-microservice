@@ -3,11 +3,13 @@ import morgan from "morgan";
 import helmet from "helmet";
 import instanceMongodb from "./dbs/init.mongodb";
 import dotenv from "dotenv";
+import router from "./routes";
 
 const app = express();
 
 //config middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(helmet());
 dotenv.config();
@@ -16,11 +18,6 @@ dotenv.config();
 instanceMongodb;
 
 //config routes
-
-app.get("/", (req: Request, res: Response) => {
-  res.status(200).json({
-    message: "Hello World",
-  });
-});
+app.use("/", router);
 
 export default app;
