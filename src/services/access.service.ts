@@ -1,6 +1,6 @@
 "use strict";
 
-import { IShop } from "../interfaces/shop.interface";
+import { IShop } from "../interfaces/index";
 import Shop from "../models/shop.model";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -62,9 +62,6 @@ class AccessService {
           };
         }
 
-        const publicKeyObject = crypto.createPublicKey(publicKey);
-        console.log("publicKeyObject::::", publicKeyObject);
-
         const tokens = await createTokenPair(
           { userId: newShop._id, email },
           publicKeyString,
@@ -84,7 +81,7 @@ class AccessService {
       }
     } catch (error) {
       return {
-        code: "xxx",
+        code: "xxxx",
         message: error.message,
         status: "error",
       };
