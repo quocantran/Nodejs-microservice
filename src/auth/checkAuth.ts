@@ -3,8 +3,7 @@
 import { Request, Response, NextFunction } from "express";
 import { findById } from "../services/apikey.service";
 import { IApiKey } from "../interfaces";
-import ApiKey from "../models/apikey.model";
-import crypto from "crypto";
+
 const HEADER = {
   API_KEY: "x-api-key",
   AUTHORIZATION: "Authorization",
@@ -53,5 +52,11 @@ export const checkPermission = (permission: string) => {
     return res.status(403).json({
       message: "Forbidden Error",
     });
+  };
+};
+
+export const asyncHandler = (fn: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    fn(req, res, next).catch(next);
   };
 };

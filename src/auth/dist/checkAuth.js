@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.checkPermission = exports.apiKey = void 0;
+exports.asyncHandler = exports.checkPermission = exports.apiKey = void 0;
 var apikey_service_1 = require("../services/apikey.service");
 var HEADER = {
     API_KEY: "x-api-key",
@@ -86,5 +86,10 @@ exports.checkPermission = function (permission) {
         return res.status(403).json({
             message: "Forbidden Error"
         });
+    };
+};
+exports.asyncHandler = function (fn) {
+    return function (req, res, next) {
+        fn(req, res, next)["catch"](next);
     };
 };

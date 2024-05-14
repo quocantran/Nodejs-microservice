@@ -12,9 +12,13 @@ var keyTokenSchema = new mongoose_1["default"].Schema({
         type: String,
         required: true
     },
-    refreshToken: {
+    refreshTokensUsed: {
         type: Array,
         "default": []
+    },
+    refreshToken: {
+        type: String,
+        required: true
     }
 }, { timestamps: true });
 var KeyTokenModel = mongoose_1["default"].model("KeyToken", keyTokenSchema);

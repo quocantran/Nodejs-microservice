@@ -15,11 +15,11 @@ export const createTokenPair = async (
       expiresIn: "7 days",
     });
 
-    jwt.verify(accessToken, publicKey, (err: any, decoded: any) => {
+    jwt.verify(refreshToken, publicKey, (err: any, decoded: any) => {
       if (err) {
         throw new Error("Access token is invalid");
       } else {
-        console.log(decoded);
+        console.log("Access token is valid");
       }
     });
 

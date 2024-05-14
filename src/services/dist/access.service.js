@@ -42,6 +42,8 @@ var crypto_1 = require("crypto");
 var keyToken_service_1 = require("./keyToken.service");
 var authUtils_1 = require("../auth/authUtils");
 var utils_1 = require("../utils");
+var error_response_1 = require("../core/error.response");
+var shop_service_1 = require("./shop.service");
 var RoleShop = {
     SHOP: "SHOP",
     ADMIN: "ADMIN",
@@ -52,21 +54,16 @@ var AccessService = /** @class */ (function () {
     function AccessService() {
     }
     AccessService.register = function (shop) { return __awaiter(void 0, void 0, void 0, function () {
-        var name, email, password, holderShop, hashPassword, newShop, _a, privateKey, publicKey, data, publicKeyString, tokens, error_1;
+        var name, email, password, holderShop, hashPassword, newShop, _a, privateKey, publicKey, publicKeyString, tokens, data;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 7, , 8]);
                     name = shop.name, email = shop.email, password = shop.password;
                     return [4 /*yield*/, shop_model_1["default"].findOne({ email: email }).lean()];
                 case 1:
                     holderShop = _b.sent();
                     if (holderShop) {
-                        return [2 /*return*/, {
-                                code: "xxxx",
-                                message: "Email already exists",
-                                status: "error"
-                            }];
+                        throw new error_response_1.BadRequestError("Email already exists");
                     }
                     return [4 /*yield*/, bcrypt_1["default"].hash(password, 10)];
                 case 2:
@@ -91,24 +88,20 @@ var AccessService = /** @class */ (function () {
                             format: "pem"
                         }
                     }), privateKey = _a.privateKey, publicKey = _a.publicKey;
+                    publicKeyString = publicKey.toString();
+                    return [4 /*yield*/, authUtils_1.createTokenPair({ userId: newShop._id, email: email }, publicKeyString, privateKey)];
+                case 4:
+                    tokens = _b.sent();
                     data = {
                         userId: newShop._id,
-                        publicKey: publicKey
+                        privateKey: privateKey,
+                        publicKey: publicKey,
+                        refreshToken: tokens.refreshToken
                     };
                     return [4 /*yield*/, keyToken_service_1["default"].createKeyToken(data)];
-                case 4:
-                    publicKeyString = _b.sent();
-                    if (!publicKeyString) {
-                        return [2 /*return*/, {
-                                code: "xxxx",
-                                message: "Create key token failed"
-                            }];
-                    }
-                    return [4 /*yield*/, authUtils_1.createTokenPair({ userId: newShop._id, email: email }, publicKeyString, privateKey)];
                 case 5:
-                    tokens = _b.sent();
+                    _b.sent();
                     return [2 /*return*/, {
-                            code: 20001,
                             metadata: {
                                 shop: utils_1.getInfoData({
                                     fileds: ["_id", "name", "email"],
@@ -117,18 +110,68 @@ var AccessService = /** @class */ (function () {
                                 tokens: tokens
                             }
                         }];
-                case 6: return [3 /*break*/, 8];
-                case 7:
-                    error_1 = _b.sent();
-                    return [2 /*return*/, {
-                            code: "xxxx",
-                            message: error_1.message,
-                            status: "error"
-                        }];
-                case 8: return [2 /*return*/];
+                case 6: return [2 /*return*/];
             }
         });
     }); };
+    AccessService.login = function (_a) {
+        var email = _a.email, password = _a.password, _b = _a.refreshToken, refreshToken = _b === void 0 ? null : _b;
+        return __awaiter(void 0, void 0, void 0, function () {
+            var shop, match, _c, privateKey, publicKey, publicKeyString, tokens, data;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0: return [4 /*yield*/, shop_service_1.findByEmail({ email: email })];
+                    case 1:
+                        shop = _d.sent();
+                        if (!shop) {
+                            throw new error_response_1.UnauthorizedError("Shop not found", 401);
+                        }
+                        return [4 /*yield*/, bcrypt_1["default"].compare(password, shop.password)];
+                    case 2:
+                        match = _d.sent();
+                        if (!match) {
+                            throw new error_response_1.UnauthorizedError("Shop not found", 401);
+                        }
+                        _c = crypto_1["default"].generateKeyPairSync("rsa", {
+                            modulusLength: 4096,
+                            publicKeyEncoding: {
+                                type: "pkcs1",
+                                format: "pem"
+                            },
+                            privateKeyEncoding: {
+                                type: "pkcs1",
+                                format: "pem"
+                            }
+                        }), privateKey = _c.privateKey, publicKey = _c.publicKey;
+                        publicKeyString = publicKey.toString();
+                        return [4 /*yield*/, authUtils_1.createTokenPair({ userId: shop._id, email: email }, publicKeyString, privateKey)];
+                    case 3:
+                        tokens = _d.sent();
+                        data = {
+                            userId: shop._id,
+                            privateKey: privateKey,
+                            publicKey: publicKey,
+                            refreshToken: tokens.refreshToken
+                        };
+                        return [4 /*yield*/, keyToken_service_1["default"].createKeyToken(data)];
+                    case 4:
+                        _d.sent();
+                        if (!publicKeyString) {
+                            throw new error_response_1.BadRequestError("Error create key token", 500);
+                        }
+                        return [2 /*return*/, {
+                                metadata: {
+                                    shop: utils_1.getInfoData({
+                                        fileds: ["_id", "name", "email"],
+                                        object: shop
+                                    }),
+                                    tokens: tokens
+                                }
+                            }];
+                }
+            });
+        });
+    };
     return AccessService;
 }());
 exports["default"] = AccessService;
