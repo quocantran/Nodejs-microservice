@@ -1,5 +1,6 @@
 "use strict";
 
+import mongoose from "mongoose";
 import KeyTokenModel from "../models/keytoken.model";
 
 interface IData {
@@ -10,16 +11,6 @@ interface IData {
 
 class KeyTokenService {
   static createKeyToken = async (data: IData) => {
-    // const { userId, publicKey } = data;
-
-    // const publicKeyString = publicKey.toString();
-
-    // const tokens = await KeyTokenModel.create({
-    //   user: userId,
-    //   publicKey: publicKeyString,
-    // });
-    // return tokens ? publicKeyString : null;
-
     const filter = { user: data.userId };
     const update: any = {
       publicKey: data.publicKey,
@@ -29,11 +20,31 @@ class KeyTokenService {
 
     const options = { upsert: true, new: true };
 
-    const tokens = await KeyTokenModel.findOneAndUpdate(
-      filter,
-      update,
-      options
-    );
+    await KeyTokenModel.findOneAndUpdate(filter, update, options);
+  };
+
+  static findByUserId = async (userId: string) => {
+    const keyToken = await KeyTokenModel.findOne({ user: userId });
+    return keyToken;
+  };
+
+  static removeKeyById = async (keyStoreId: mongoose.Types.ObjectId) => {
+    return await KeyTokenModel.deleteOne({ _id: keyStoreId });
+  };
+
+  static findByRefreshTokenUsed = async (refreshToken: string) => {
+    return await KeyTokenModel.findOne({
+      refreshTokensUsed: refreshToken,
+    }).lean();
+  };
+  static findByRefreshToken = async (refreshToken: string) => {
+    return await KeyTokenModel.findOne({
+      refreshToken,
+    });
+  };
+
+  static deleteKeyById = async (userId: string) => {
+    return await KeyTokenModel.deleteOne({ user: userId });
   };
 }
 export default KeyTokenService;
