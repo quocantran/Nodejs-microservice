@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import KeyTokenModel from "../models/keytoken.model";
 
 interface IData {
-  userId: string;
+  userId: mongoose.Types.ObjectId;
   publicKey: any;
   refreshToken: string;
 }
@@ -43,7 +43,7 @@ class KeyTokenService {
     });
   };
 
-  static deleteKeyById = async (userId: string) => {
+  static deleteKeyById = async (userId: mongoose.Types.ObjectId) => {
     return await KeyTokenModel.deleteOne({ user: userId });
   };
 }

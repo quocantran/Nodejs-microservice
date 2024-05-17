@@ -8,10 +8,13 @@ import { IDecoded, IKeyStore } from "../interfaces";
 const HEADER = {
   CLIENT_ID: "x-client-id",
   AUTHORIZATION: "authorization",
+  REFRESHTOKEN: "x-rtoken-id",
 };
 
 export interface RequestWithKeyStore extends Request {
   keyStore: IKeyStore;
+  refreshToken?: string;
+  user: IDecoded;
 }
 
 export const createTokenPair = async (
@@ -51,22 +54,42 @@ export const authentication = asyncHandler(
     if (!keyStore) {
       throw new BadRequestError("not found keyStore", 404);
     }
+    const pathName = req.path;
+
+    if (pathName === "/shop/refresh-token") {
+      const refreshToken = req.headers[HEADER.REFRESHTOKEN]?.toString();
+      if (!refreshToken) {
+        throw new UnauthorizedError("not found refresh token");
+      }
+      const decoded = checkRefreshToken(refreshToken, keyStore.publicKey);
+      if (userId !== (decoded.userId as unknown as string)) {
+        throw new UnauthorizedError("Invalid refresh Token");
+      }
+      req.keyStore = keyStore;
+      req.refreshToken = refreshToken;
+      req.user = decoded;
+      return next();
+    }
 
     const accessToken = req.headers[HEADER.AUTHORIZATION]?.toString();
 
     if (!accessToken) {
-      throw new UnauthorizedError("not found token");
+      throw new UnauthorizedError("not found accessToken");
     }
 
     try {
-      const decoded: any = jwt.verify(accessToken, keyStore.publicKey);
-      if (userId !== decoded.userId) {
-        throw new UnauthorizedError("Invalid token");
+      const decoded: IDecoded = jwt.verify(
+        accessToken,
+        keyStore.publicKey
+      ) as IDecoded;
+      if (userId !== (decoded.userId as unknown as string)) {
+        throw new UnauthorizedError("Invalid accessToken");
       }
       req.keyStore = keyStore;
+      req.user = decoded;
       return next();
     } catch (error) {
-      throw error;
+      throw new UnauthorizedError("Unauthorized");
     }
   }
 );
@@ -75,6 +98,10 @@ export const checkRefreshToken = (
   refreshToken: string,
   keySecret: string
 ): IDecoded => {
-  const decoded = jwt.verify(refreshToken, keySecret);
-  return decoded as IDecoded;
+  try {
+    const decoded = jwt.verify(refreshToken, keySecret);
+    return decoded as IDecoded;
+  } catch (error) {
+    throw new UnauthorizedError("Invalid refresh token");
+  }
 };

@@ -102,13 +102,11 @@ var AccessService = /** @class */ (function () {
                 case 5:
                     _b.sent();
                     return [2 /*return*/, {
-                            metadata: {
-                                shop: utils_1.getInfoData({
-                                    fileds: ["_id", "name", "email"],
-                                    object: newShop
-                                }),
-                                tokens: tokens
-                            }
+                            shop: utils_1.getInfoData({
+                                fileds: ["_id", "name", "email"],
+                                object: newShop
+                            }),
+                            tokens: tokens
                         }];
                 case 6: return [2 /*return*/];
             }
@@ -124,13 +122,13 @@ var AccessService = /** @class */ (function () {
                     case 1:
                         shop = _d.sent();
                         if (!shop) {
-                            throw new error_response_1.UnauthorizedError("Shop not found", 401);
+                            throw new error_response_1.UnauthorizedError("Shop not found");
                         }
                         return [4 /*yield*/, bcrypt_1["default"].compare(password, shop.password)];
                     case 2:
                         match = _d.sent();
                         if (!match) {
-                            throw new error_response_1.UnauthorizedError("Shop not found", 401);
+                            throw new error_response_1.UnauthorizedError("Shop not found");
                         }
                         _c = crypto_1["default"].generateKeyPairSync("rsa", {
                             modulusLength: 4096,
@@ -160,18 +158,89 @@ var AccessService = /** @class */ (function () {
                             throw new error_response_1.BadRequestError("Error create key token", 500);
                         }
                         return [2 /*return*/, {
-                                metadata: {
-                                    shop: utils_1.getInfoData({
-                                        fileds: ["_id", "name", "email"],
-                                        object: shop
-                                    }),
-                                    tokens: tokens
-                                }
+                                shop: utils_1.getInfoData({
+                                    fileds: ["_id", "name", "email"],
+                                    object: shop
+                                }),
+                                tokens: tokens
                             }];
                 }
             });
         });
     };
+    AccessService.logout = function (keyStore) { return __awaiter(void 0, void 0, void 0, function () {
+        var deleteKey;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, keyToken_service_1["default"].removeKeyById(keyStore._id)];
+                case 1:
+                    deleteKey = _a.sent();
+                    console.log({
+                        deleteKey: deleteKey
+                    });
+                    return [2 /*return*/, deleteKey];
+            }
+        });
+    }); };
+    AccessService.refreshToken = function (keyStore, refreshToken) { return __awaiter(void 0, void 0, void 0, function () {
+        var refreshTokensUsed, user, foundToken, shop, _a, privateKey, publicKey, publicKeyString, tokens;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    refreshTokensUsed = keyStore.refreshTokensUsed, user = keyStore.user;
+                    foundToken = refreshTokensUsed.includes(refreshToken);
+                    if (!foundToken) return [3 /*break*/, 2];
+                    return [4 /*yield*/, keyToken_service_1["default"].deleteKeyById(user)];
+                case 1:
+                    _b.sent();
+                    throw new error_response_1.BadRequestError("Something went wrong! please relogin");
+                case 2:
+                    if (keyStore.refreshToken !== refreshToken) {
+                        throw new error_response_1.UnauthorizedError("Shop is not registered");
+                    }
+                    console.log(user);
+                    return [4 /*yield*/, shop_service_1.findByShopId({ id: user })];
+                case 3:
+                    shop = _b.sent();
+                    if (!shop) {
+                        throw new error_response_1.UnauthorizedError("Shop is not registered2");
+                    }
+                    _a = crypto_1["default"].generateKeyPairSync("rsa", {
+                        modulusLength: 4096,
+                        publicKeyEncoding: {
+                            type: "pkcs1",
+                            format: "pem"
+                        },
+                        privateKeyEncoding: {
+                            type: "pkcs1",
+                            format: "pem"
+                        }
+                    }), privateKey = _a.privateKey, publicKey = _a.publicKey;
+                    publicKeyString = publicKey.toString();
+                    return [4 /*yield*/, authUtils_1.createTokenPair({ userId: user, email: shop.email }, publicKeyString, privateKey)];
+                case 4:
+                    tokens = _b.sent();
+                    return [4 /*yield*/, keyStore.updateOne({
+                            $set: {
+                                refreshToken: tokens.refreshToken,
+                                publicKey: publicKeyString
+                            },
+                            $addToSet: {
+                                refreshTokensUsed: refreshToken
+                            }
+                        })];
+                case 5:
+                    _b.sent();
+                    return [2 /*return*/, {
+                            shop: utils_1.getInfoData({
+                                fileds: ["_id", "name", "email"],
+                                object: shop
+                            }),
+                            tokens: tokens
+                        }];
+            }
+        });
+    }); };
     return AccessService;
 }());
 exports["default"] = AccessService;

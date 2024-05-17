@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import slugify from "slugify";
 
 // Declare the Schema of the Mongo model
 const productSchema = new mongoose.Schema(
@@ -37,18 +38,33 @@ const productSchema = new mongoose.Schema(
       type: Schema.Types.Mixed,
       required: true,
     },
+    product_slug: {
+      type: String,
+    },
   },
 
   { timestamps: true }
 );
 
+productSchema.index({ product_name: "text", product_description: "text" });
+
+productSchema.pre("save", function (next) {
+  this.product_slug = slugify(this.product_name, { lower: true });
+  next();
+});
+
 //Export the model
-export const Product = mongoose.model("Product", productSchema, "Product");
+export const ProductModel = mongoose.model("Product", productSchema);
 
 const clothingSchema = new mongoose.Schema(
   {
     brand: {
       type: String,
+      required: true,
+    },
+    product_shop: {
+      type: Schema.Types.ObjectId,
+      ref: "Shop",
       required: true,
     },
     size: {
@@ -59,11 +75,7 @@ const clothingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Clothing = Product.discriminator(
-  "Clothing",
-  clothingSchema,
-  "Clothing"
-);
+export const ClothingModel = mongoose.model("Clothing", clothingSchema);
 
 const electronicSchema = new mongoose.Schema(
   {
@@ -71,12 +83,13 @@ const electronicSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    product_shop: {
+      type: Schema.Types.ObjectId,
+      ref: "Shop",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-export const Electronics = Product.discriminator(
-  "Electronics",
-  electronicSchema,
-  "Electronics"
-);
+export const ElectronicsModel = mongoose.model("Electronics", electronicSchema);

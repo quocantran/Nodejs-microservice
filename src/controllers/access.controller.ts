@@ -29,10 +29,17 @@ class AccessController {
     }).sendResponse(res);
   };
 
-  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+  refreshToken = async (
+    req: RequestWithKeyStore,
+    res: Response,
+    next: NextFunction
+  ) => {
     new OK({
       message: "Refresh Token Success",
-      metadata: await AccessService.refreshToken(req.body.refreshToken),
+      metadata: await AccessService.refreshToken(
+        req.keyStore,
+        req.refreshToken
+      ),
     }).sendResponse(res);
   };
 }

@@ -5,10 +5,10 @@ import Shop from "../models/shop.model";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import KeyTokenService from "./keyToken.service";
-import { checkRefreshToken, createTokenPair } from "../auth/authUtils";
+import { createTokenPair } from "../auth/authUtils";
 import { getInfoData } from "../utils";
 import { BadRequestError, UnauthorizedError } from "../core/error.response";
-import { findByEmail } from "./shop.service";
+import { findByEmail, findByShopId } from "./shop.service";
 
 const RoleShop = {
   SHOP: "SHOP",
@@ -48,12 +48,12 @@ class AccessService {
 
       const publicKeyString = publicKey.toString();
       const tokens = await createTokenPair(
-        { userId: newShop._id as unknown as string, email },
+        { userId: newShop._id, email },
         publicKeyString,
         privateKey
       );
       const data = {
-        userId: newShop._id as unknown as string,
+        userId: newShop._id,
         privateKey,
         publicKey,
         refreshToken: tokens.refreshToken,
@@ -61,13 +61,11 @@ class AccessService {
       await KeyTokenService.createKeyToken(data);
 
       return {
-        metadata: {
-          shop: getInfoData({
-            fileds: ["_id", "name", "email"],
-            object: newShop,
-          }),
-          tokens,
-        },
+        shop: getInfoData({
+          fileds: ["_id", "name", "email"],
+          object: newShop,
+        }),
+        tokens,
       };
     }
   };
@@ -82,12 +80,13 @@ class AccessService {
     refreshToken: string;
   }) => {
     const shop = await findByEmail({ email });
+
     if (!shop) {
-      throw new UnauthorizedError("Shop not found", 401);
+      throw new UnauthorizedError("Shop not found");
     }
     const match = await bcrypt.compare(password, shop.password);
     if (!match) {
-      throw new UnauthorizedError("Shop not found", 401);
+      throw new UnauthorizedError("Shop not found");
     }
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 4096,
@@ -103,12 +102,12 @@ class AccessService {
 
     const publicKeyString = publicKey.toString();
     const tokens = await createTokenPair(
-      { userId: shop._id as unknown as string, email },
+      { userId: shop._id, email },
       publicKeyString,
       privateKey
     );
     const data = {
-      userId: shop._id as unknown as string,
+      userId: shop._id,
       privateKey,
       publicKey,
       refreshToken: tokens.refreshToken,
@@ -119,13 +118,11 @@ class AccessService {
     }
 
     return {
-      metadata: {
-        shop: getInfoData({
-          fileds: ["_id", "name", "email"],
-          object: shop,
-        }),
-        tokens,
-      },
+      shop: getInfoData({
+        fileds: ["_id", "name", "email"],
+        object: shop,
+      }),
+      tokens,
     };
   };
 
@@ -138,31 +135,23 @@ class AccessService {
     return deleteKey;
   };
 
-  static refreshToken = async (refreshToken: string) => {
-    const foundToken = await KeyTokenService.findByRefreshTokenUsed(
-      refreshToken
-    );
-    if (foundToken) {
-      const { userId, email } = checkRefreshToken(
-        refreshToken,
-        foundToken.publicKey
-      );
+  static refreshToken = async (keyStore: IKeyStore, refreshToken: string) => {
+    const { refreshTokensUsed, user } = keyStore;
 
-      await KeyTokenService.deleteKeyById(userId);
+    const foundToken = refreshTokensUsed.includes(refreshToken);
+
+    if (foundToken) {
+      await KeyTokenService.deleteKeyById(user);
       throw new BadRequestError("Something went wrong! please relogin");
     }
-    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
-    console.log({ holderToken });
-    if (!holderToken) {
+    if (keyStore.refreshToken !== refreshToken) {
       throw new UnauthorizedError("Shop is not registered");
     }
-    const { userId, email } = checkRefreshToken(
-      refreshToken,
-      holderToken.publicKey
-    );
-    const shop = await findByEmail({ email });
+    console.log(user);
+
+    const shop = await findByShopId({ id: user });
     if (!shop) {
-      throw new UnauthorizedError("Shop is not registered");
+      throw new UnauthorizedError("Shop is not registered2");
     }
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 4096,
@@ -177,26 +166,25 @@ class AccessService {
     });
     const publicKeyString = publicKey.toString();
     const tokens = await createTokenPair(
-      { userId, email },
+      { userId: user, email: shop.email },
       publicKeyString,
       privateKey
     );
-    await holderToken.updateOne({
+    await keyStore.updateOne({
       $set: {
         refreshToken: tokens.refreshToken,
+        publicKey: publicKeyString,
       },
       $addToSet: {
         refreshTokensUsed: refreshToken,
       },
     });
     return {
-      metadata: {
-        shop: getInfoData({
-          fileds: ["_id", "name", "email"],
-          object: shop,
-        }),
-        tokens,
-      },
+      shop: getInfoData({
+        fileds: ["_id", "name", "email"],
+        object: shop,
+      }),
+      tokens,
     };
   };
 }
