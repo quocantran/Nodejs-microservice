@@ -27,15 +27,16 @@ export interface IDecoded {
   email: string;
 }
 
-export interface IProduct {
+export interface IProduct extends mongoose.Document {
   product_name: string;
   product_price: number;
-  product_description: string;
-  product_thumb: string;
+  product_description?: string;
+  product_thumb?: string;
   product_quantity: number;
   product_category: string;
   product_attributes: Schema.Types.Mixed;
   product_shop: mongoose.Types.ObjectId;
+  product_old_quantity?: number;
 }
 
 export interface Inventory {
@@ -44,4 +45,14 @@ export interface Inventory {
   inven_stock: number;
   inven_shopId: mongoose.Types.ObjectId;
   inven_reservations?: Array<any>;
+}
+
+export interface IOrder {
+  shopId?: string;
+  products: {
+    product_price: number;
+    product_quantity: number;
+    _id: string;
+  }[];
+  totalPrice?: number;
 }

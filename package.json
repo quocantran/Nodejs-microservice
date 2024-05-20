@@ -22,6 +22,7 @@
     "lodash": "^4.17.21",
     "mongoose": "^8.3.4",
     "morgan": "^1.10.0",
+    "redis": "^4.6.14",
     "slugify": "^1.6.6"
   },
   "devDependencies": {
@@ -31,6 +32,7 @@
     "@types/lodash": "^4.17.1",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.12.11",
+    "@types/redis": "^4.0.11",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
