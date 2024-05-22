@@ -27,16 +27,10 @@ export const createTokenPair = async (
       algorithm: "RS256",
       expiresIn: "2 days",
     });
+    delete payload.userId;
     const refreshToken = jwt.sign(payload, privateKey, {
       algorithm: "RS256",
       expiresIn: "7 days",
-    });
-
-    jwt.verify(refreshToken, publicKey, (err: any, decoded: IDecoded) => {
-      if (err) {
-        throw new Error("Access token is invalid");
-      }
-      return decoded;
     });
 
     return { accessToken, refreshToken };

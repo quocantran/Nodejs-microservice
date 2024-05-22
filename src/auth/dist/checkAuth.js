@@ -40,7 +40,7 @@ exports.asyncHandler = exports.checkPermission = exports.apiKey = void 0;
 var apikey_service_1 = require("../services/apikey.service");
 var HEADER = {
     API_KEY: "x-api-key",
-    AUTHORIZATION: "Authorization"
+    AUTHORIZATION: "authorization"
 };
 exports.apiKey = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var key, objectKey, err_1;
@@ -55,7 +55,7 @@ exports.apiKey = function (req, res, next) { return __awaiter(void 0, void 0, vo
                             message: "Forbidden Error"
                         })];
                 }
-                return [4 /*yield*/, apikey_service_1.findById(key)];
+                return [4 /*yield*/, apikey_service_1.findApiKeyById(key)];
             case 1:
                 objectKey = _b.sent();
                 if (!objectKey) {

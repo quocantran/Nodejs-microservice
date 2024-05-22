@@ -1,12 +1,12 @@
 "use strict";
 
 import { Request, Response, NextFunction } from "express";
-import { findById } from "../services/apikey.service";
+import { findApiKeyById } from "../services/apikey.service";
 import { IApiKey } from "../interfaces";
 
 const HEADER = {
   API_KEY: "x-api-key",
-  AUTHORIZATION: "Authorization",
+  AUTHORIZATION: "authorization",
 };
 
 interface RequestWithObjectKey extends Request {
@@ -26,7 +26,7 @@ export const apiKey = async (
         message: "Forbidden Error",
       });
     }
-    const objectKey = await findById(key);
+    const objectKey = await findApiKeyById(key);
     if (!objectKey) {
       return res.status(403).json({
         message: "Forbidden Error",

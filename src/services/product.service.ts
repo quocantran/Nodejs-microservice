@@ -6,6 +6,11 @@ import { IDecoded, IProduct, Inventory } from "../interfaces/index";
 import { ClothingModel, ProductModel } from "../models/product.model";
 import parse from "api-query-params";
 import { insertInventory } from "../models/repositories/inventory.repo";
+import {
+  cachedProductData,
+  deleteAllKeyProduct,
+  setProductData,
+} from "./redis.service";
 interface IProductClass {
   createProduct(): Promise<any>;
   updateProduct(productId: mongoose.Types.ObjectId): Promise<any>;
@@ -31,6 +36,11 @@ class ProductFactory {
   }
 
   static async getProductsPaginated(qs: any) {
+    const redisKey = `product_${JSON.stringify(qs)}`;
+    const cachedData = await cachedProductData(redisKey);
+    if (cachedData) {
+      return cachedData;
+    }
     const { filter, sort, population } = parse(qs);
     delete filter.current;
     delete filter.pageSize;
@@ -39,6 +49,7 @@ class ProductFactory {
     const totalPage = Math.ceil(totalRecord / limit);
     const skip = (qs.current - 1) * limit;
     const current = +qs.current ? +qs.current : 1;
+
     const products = await ProductModel.find(filter)
       .skip(skip)
       .limit(limit)
@@ -46,8 +57,7 @@ class ProductFactory {
       .populate(population)
       .lean()
       .exec();
-
-    return {
+    const response = {
       meta: {
         current: current,
         pageSize: limit,
@@ -56,6 +66,8 @@ class ProductFactory {
       },
       result: products,
     };
+    await setProductData(redisKey, response);
+    return response;
   }
 
   static async searchProduct(search: string) {
@@ -118,6 +130,7 @@ class Product {
 
   //create product
   async createProduct(productId: mongoose.Types.ObjectId) {
+    await deleteAllKeyProduct();
     const newProduct = await ProductModel.create({
       ...this,
       _id: productId,
@@ -136,6 +149,7 @@ class Product {
 
   //update product
   async updateProduct(productId: mongoose.Types.ObjectId) {
+    await deleteAllKeyProduct();
     return await ProductModel.updateOne(
       {
         _id: productId,

@@ -56,3 +56,10 @@ export interface IOrder {
   }[];
   totalPrice?: number;
 }
+
+export interface IComment {
+  productId: string;
+  userId: string;
+  content: string;
+  parentId?: string;
+}
