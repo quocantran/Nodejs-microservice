@@ -147,7 +147,6 @@ class AccessService {
     if (keyStore.refreshToken !== refreshToken) {
       throw new UnauthorizedError("Shop is not registered");
     }
-    console.log(user);
 
     const shop = await findByShopId({ id: user });
     if (!shop) {

@@ -9,6 +9,7 @@ import checkoutRouter from "./checkout";
 import inventoryRouter from "./inventory";
 import commentRouter from "./comment";
 import notificationRouter from "./notification";
+import uploadRouter from "./upload";
 const router = express.Router();
 
 //check apikey
@@ -20,7 +21,7 @@ router.use(checkPermission("0000"));
 router.use("/api/v1/inventory", inventoryRouter);
 router.use("/api/v1/notification", notificationRouter);
 router.use("/api/v1/comment", commentRouter);
-
+router.use("/api/v1/upload", uploadRouter);
 router.use("/api/v1/checkout", checkoutRouter);
 router.use("/api/v1/product", productRouter);
 router.use("/api/v1/auth", accessRouter);

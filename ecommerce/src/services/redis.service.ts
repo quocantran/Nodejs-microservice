@@ -4,16 +4,8 @@ import * as redis from "redis";
 
 import { promisify } from "util";
 import { reservationInventory } from "../models/repositories/inventory.repo";
-import config from "../configs/config.mongodb";
-import { IProduct } from "../interfaces";
 
-const redisClient = redis.createClient({
-  password: config.redis.password,
-  socket: {
-    host: config.redis.host,
-    port: config.redis.port as number,
-  },
-});
+const redisClient = redis.createClient();
 
 redisClient.connect().then(() => {
   console.log("Redis connected");

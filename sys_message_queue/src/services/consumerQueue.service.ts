@@ -19,12 +19,6 @@ export default class MessageService {
 
       const notiQueue = "notiQueue";
 
-      // setTimeout(() => {
-      //   channel.consume(notiQueue, (msg) => {
-      //     console.log("Message success received: ", msg.content.toString());
-      //   });
-      // }, 6000);
-
       channel.consume(notiQueue, (msg) => {
         try {
           const numberTest = Math.random();
@@ -37,7 +31,6 @@ export default class MessageService {
 
           channel.ack(msg);
         } catch (err) {
-          // console.error(err);
           channel.nack(msg, false, false);
         }
       });

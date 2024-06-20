@@ -8,11 +8,6 @@ const dev = {
   db: {
     url: process.env.MONGODB_URL,
   },
-  redis: {
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
-  },
 };
 
 const pro = {
@@ -21,11 +16,6 @@ const pro = {
   },
   db: {
     url: process.env.MONGODB_URL,
-  },
-  redis: {
-    host: process.env.REDIS_HOST,
-    port: +process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
   },
 };
 

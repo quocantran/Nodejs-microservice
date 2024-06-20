@@ -29,9 +29,7 @@ export const connectToRabbitMqForTest = async () => {
 export const consumerQueue = async (channel: Channel, queueName: string) => {
   try {
     await channel.assertQueue(queueName, { durable: true });
-    console.log(
-      ` [*] Waiting for messages in ${queueName}. To exit press CTRL+C`
-    );
+    console.log(` [*] Waiting for messages in ${queueName}`);
     channel.consume(
       queueName,
       (msg: any) => {
