@@ -1,15 +1,12 @@
 "use strict";
 
-import * as redis from "redis";
-
 import { promisify } from "util";
 import { reservationInventory } from "../models/repositories/inventory.repo";
+import { getRedis, initRedis } from "../dbs/init.redis";
 
-const redisClient = redis.createClient();
+initRedis();
 
-redisClient.connect().then(() => {
-  console.log("Redis connected");
-});
+const redisClient = getRedis().instanceConnect;
 
 const pExpire = promisify(redisClient.pExpire).bind(redisClient);
 
@@ -60,7 +57,7 @@ export const setData = async (key: string, data: any) => {
 export const deleteAllKeyProduct = async () => {
   const keys = await redisClient.keys("product_*");
   if (keys.length > 0) {
-    keys.forEach(async (key) => {
+    keys.forEach(async (key: any) => {
       await redisClient.del(key);
     });
   }

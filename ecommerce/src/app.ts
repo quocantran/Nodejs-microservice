@@ -4,7 +4,7 @@ import helmet from "helmet";
 import instanceMongodb from "./dbs/init.mongodb";
 import dotenv from "dotenv";
 import router from "./routes";
-
+import { initElasticsearch } from "./dbs/init.elasticsearch";
 const app = express();
 
 //config middleware
@@ -15,6 +15,9 @@ app.use(helmet());
 dotenv.config();
 
 //connect to database
+initElasticsearch({
+  ELASTICSEARCH_IS_ENABLED: true,
+});
 instanceMongodb;
 
 //config routes
