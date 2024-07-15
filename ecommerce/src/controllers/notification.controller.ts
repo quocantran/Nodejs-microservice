@@ -2,11 +2,11 @@
 
 import { Request, Response } from "express";
 import { OK } from "../core/success.response";
-import { RequestWithKeyStore } from "../auth/authUtils";
+import { IUser } from "../auth/authUtils";
 import NotificationService from "../services/notification.service";
 
 class NotificationController {
-  getListNotiByUser = async (req: RequestWithKeyStore, res: Response) => {
+  getListNotiByUser = async (req: IUser, res: Response) => {
     new OK({
       message: "Success",
       metadata: await NotificationService.getListNotiByUser({

@@ -2,7 +2,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import AccessService from "../services/access.service";
 import { CREATED, OK } from "../core/success.response";
-import { RequestWithKeyStore } from "../auth/authUtils";
+import { IUser } from "../auth/authUtils";
 import CommentService from "../services/comment.service";
 
 class CommentController {

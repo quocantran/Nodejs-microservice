@@ -108,7 +108,6 @@ class AccessService {
     );
     const data = {
       userId: shop._id,
-      privateKey,
       publicKey,
       refreshToken: tokens.refreshToken,
     };

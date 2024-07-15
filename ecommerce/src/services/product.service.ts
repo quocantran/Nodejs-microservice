@@ -6,11 +6,7 @@ import { IDecoded, IProduct, Inventory } from "../interfaces/index";
 import { ClothingModel, ProductModel } from "../models/product.model";
 import parse from "api-query-params";
 import { insertInventory } from "../models/repositories/inventory.repo";
-import {
-  cachedProductData,
-  deleteAllKeyProduct,
-  setData,
-} from "./redis.service";
+import { cachedRedisData, deleteAllKey, setData } from "./redis.service";
 import NotificationService from "./notification.service";
 interface IProductClass {
   createProduct(userId: string): Promise<any>;
@@ -39,7 +35,7 @@ class ProductFactory {
 
   static async getProductsPaginated(qs: any) {
     const redisKey = `product_${JSON.stringify(qs)}`;
-    const cachedData = await cachedProductData(redisKey);
+    const cachedData = await cachedRedisData(redisKey);
     if (cachedData) {
       return cachedData;
     }
@@ -132,7 +128,6 @@ class Product {
 
   //create product
   async createProduct(userId: string, productId: mongoose.Types.ObjectId) {
-    await deleteAllKeyProduct();
     const newProduct = await ProductModel.create({
       ...this,
       _id: productId,
@@ -145,6 +140,7 @@ class Product {
         inven_location: "default",
       };
       await insertInventory(inventory);
+      await deleteAllKey({ prefix: "product" });
       NotificationService.pushNotiToSystem({
         type: "SHOP_001",
         receivedId: 1,
@@ -153,15 +149,14 @@ class Product {
           product_name: this.product_name,
           product_shop: this.product_shop,
         },
-      })
-      .catch((err) => console.log(err));
+      }).catch((err) => console.log(err));
     }
     return newProduct;
   }
 
   //update product
   async updateProduct(productId: mongoose.Types.ObjectId) {
-    await deleteAllKeyProduct();
+    await deleteAllKey({ prefix: "product" });
     return await ProductModel.updateOne(
       {
         _id: productId,

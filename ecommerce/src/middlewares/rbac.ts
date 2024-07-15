@@ -18,6 +18,9 @@ export const grantAccess = (action: string, resource: string) => {
         })
       );
       const roleName = req.query.role as string;
+      if (!rbac.hasRole(roleName)) {
+        throw new UnauthorizedError("Role not found");
+      }
       const permission = (rbac.can(roleName) as unknown as PermissionQuery)[
         action
       ](resource);

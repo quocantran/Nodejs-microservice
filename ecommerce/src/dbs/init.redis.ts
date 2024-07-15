@@ -2,7 +2,6 @@
 
 import * as redis from "redis";
 import { RedisClientType } from "@redis/client";
-import RedisClient from "@redis/client/dist/lib/client";
 
 interface RedisClientInstance {
   instanceConnect: RedisClientType;
@@ -10,12 +9,6 @@ interface RedisClientInstance {
 
 let client: RedisClientInstance = {
   instanceConnect: {} as RedisClientType,
-};
-let statusConnectRedis = {
-  CONNECT: "connect",
-  END: "end",
-  RECONNECT: "reconnecting",
-  ERROR: "error",
 };
 
 const handleEventConnect = async (connectionRedis: RedisClientType) => {

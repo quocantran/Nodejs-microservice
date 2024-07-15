@@ -1,19 +1,19 @@
 "use strict";
 
-import { RequestWithKeyStore } from "../auth/authUtils";
+import { IUser } from "../auth/authUtils";
 import { OK } from "../core/success.response";
 import CartService from "../services/cart.service";
 import { Request, Response } from "express";
 
 class CartController {
-  getListCartUser = async (req: RequestWithKeyStore, res: Response) => {
+  getListCartUser = async (req: IUser, res: Response) => {
     new OK({
       message: "Success",
       metadata: await CartService.getListUserCart(req.user.userId.toString()),
     }).sendResponse(res);
   };
 
-  addToCart = async (req: RequestWithKeyStore, res: Response) => {
+  addToCart = async (req: IUser, res: Response) => {
     const { product } = req.body;
     new OK({
       message: "Success",
@@ -24,7 +24,7 @@ class CartController {
     }).sendResponse(res);
   };
 
-  updateCart = async (req: RequestWithKeyStore, res: Response) => {
+  updateCart = async (req: IUser, res: Response) => {
     const { product } = req.body;
 
     new OK({
@@ -36,7 +36,7 @@ class CartController {
     }).sendResponse(res);
   };
 
-  deleteCart = async (req: RequestWithKeyStore, res: Response) => {
+  deleteCart = async (req: IUser, res: Response) => {
     const { product } = req.body;
     new OK({
       message: "Success",

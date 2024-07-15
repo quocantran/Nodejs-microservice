@@ -10,6 +10,9 @@ router.get("/", asyncHandler(productController.getProductsPaginated));
 router.use(authentication);
 
 router.patch("/:productId", asyncHandler(productController.updateProduct));
+router.post("/spu/create", asyncHandler(productController.createSpu));
+router.get("/sku/:sku_id", asyncHandler(productController.findSku));
+router.get("/spu/:spu_id", asyncHandler(productController.findSpuById));
 router.post("/create", asyncHandler(productController.createProduct));
 
 export default router;

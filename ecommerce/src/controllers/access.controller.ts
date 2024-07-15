@@ -2,7 +2,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import AccessService from "../services/access.service";
 import { CREATED, OK } from "../core/success.response";
-import { RequestWithKeyStore } from "../auth/authUtils";
+import { IUser } from "../auth/authUtils";
 
 class AccessController {
   register = async (req: Request, res: Response, next: NextFunction) => {
@@ -18,22 +18,14 @@ class AccessController {
     }).sendResponse(res);
   };
 
-  logout = async (
-    req: RequestWithKeyStore,
-    res: Response,
-    next: NextFunction
-  ) => {
+  logout = async (req: IUser, res: Response, next: NextFunction) => {
     new OK({
       message: "Logout Success",
       metadata: await AccessService.logout(req.keyStore),
     }).sendResponse(res);
   };
 
-  refreshToken = async (
-    req: RequestWithKeyStore,
-    res: Response,
-    next: NextFunction
-  ) => {
+  refreshToken = async (req: IUser, res: Response, next: NextFunction) => {
     new OK({
       message: "Refresh Token Success",
       metadata: await AccessService.refreshToken(

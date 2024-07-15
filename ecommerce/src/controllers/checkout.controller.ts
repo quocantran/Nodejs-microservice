@@ -3,10 +3,10 @@
 import { Request, Response } from "express";
 import { OK } from "../core/success.response";
 import CheckoutService from "../services/checkout.service";
-import { RequestWithKeyStore } from "../auth/authUtils";
+import { IUser } from "../auth/authUtils";
 
 class CheckoutController {
-  checkoutReview = async (req: RequestWithKeyStore, res: Response) => {
+  checkoutReview = async (req: IUser, res: Response) => {
     new OK({
       message: "Success",
       metadata: await CheckoutService.checkoutReview({

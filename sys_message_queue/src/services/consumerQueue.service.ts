@@ -31,6 +31,8 @@ export default class MessageService {
 
           channel.ack(msg);
         } catch (err) {
+          // negative acknowledgment
+          // sử dụng để xác nhận 1 message bị lỗi và không thể xử lý
           channel.nack(msg, false, false);
         }
       });

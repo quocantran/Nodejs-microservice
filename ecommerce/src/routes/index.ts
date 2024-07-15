@@ -12,6 +12,8 @@ import notificationRouter from "./notification";
 import uploadRouter from "./upload";
 import profileRouter from "./profile";
 import rbacRouter from "./rbac";
+import emailRouter from "./email";
+import userRouter from "./user";
 const router = express.Router();
 
 //check apikey
@@ -22,6 +24,8 @@ router.use(checkPermission("0000"));
 
 router.use("/api/v1/inventory", inventoryRouter);
 router.use("/api/v1/notification", notificationRouter);
+router.use("/api/v1/email", emailRouter);
+router.use("/api/v1/user", userRouter);
 router.use("/api/v1/rbac", rbacRouter);
 router.use("/api/v1/profile", profileRouter);
 router.use("/api/v1/comment", commentRouter);

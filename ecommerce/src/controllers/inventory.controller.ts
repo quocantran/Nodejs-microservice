@@ -2,7 +2,7 @@
 
 import { Request, Response } from "express";
 import { OK } from "../core/success.response";
-import { RequestWithKeyStore } from "../auth/authUtils";
+import { IUser } from "../auth/authUtils";
 import InventoryService from "../services/inventory.service";
 
 class InventoryController {

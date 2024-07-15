@@ -45,20 +45,29 @@ export const releaseLock = async (key: string) => {
   return await delAsyncKey(key);
 };
 
-export const cachedProductData = async (key: string) => {
+export const cachedRedisData = async (key: string) => {
   const cachedData = await redisClient.get(key);
   return JSON.parse(cachedData);
 };
 
 export const setData = async (key: string, data: any) => {
-  return await redisClient.setNX(key, JSON.stringify(data));
+  return await redisClient.set(key, JSON.stringify(data), {
+    NX: true,
+    EX: 86400,
+  });
 };
 
-export const deleteAllKeyProduct = async () => {
-  const keys = await redisClient.keys("product_*");
+export const deleteAllKey = async ({ prefix }: { prefix: string }) => {
+  const keys = await redisClient.keys(`${prefix}_*`);
   if (keys.length > 0) {
-    keys.forEach(async (key: any) => {
-      await redisClient.del(key);
-    });
+    Promise.all(keys.map((key) => redisClient.del(key)));
+  }
+};
+
+export const deleteCartRedis = async (userId: string) => {
+  const key = `cart_${userId}`;
+
+  if (redisClient.exists(key)) {
+    return await redisClient.del(key);
   }
 };

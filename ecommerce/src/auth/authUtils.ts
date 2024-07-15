@@ -11,7 +11,7 @@ const HEADER = {
   REFRESHTOKEN: "x-rtoken-id",
 };
 
-export interface RequestWithKeyStore extends Request {
+export interface IUser extends Request {
   keyStore: IKeyStore;
   refreshToken?: string;
   user: IDecoded;
@@ -38,7 +38,7 @@ export const createTokenPair = async (
 };
 
 export const authentication = asyncHandler(
-  async (req: RequestWithKeyStore, res: Response, next: NextFunction) => {
+  async (req: IUser, res: Response, next: NextFunction) => {
     const userId = req.headers[HEADER.CLIENT_ID]?.toString();
     if (!userId) {
       throw new UnauthorizedError("not found user");

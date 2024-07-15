@@ -4,6 +4,7 @@ import { IProduct } from "../interfaces";
 import CartModel from "../models/cart.model";
 import { getProductById } from "../models/repositories/product.repo";
 import { BadRequestError } from "../core/error.response";
+import { cachedRedisData, deleteCartRedis, setData } from "./redis.service";
 
 class CartService {
   static async createCart(userId: string, product: IProduct) {
@@ -59,10 +60,13 @@ class CartService {
     }
 
     if (userCart.cart_products.some((p) => p._id == product._id)) {
+      await deleteCartRedis(userId);
       return await CartService.updateCartQuantity(userId, product);
     }
 
-    return await CartService.createCart(userId, product);
+    const updateCart = await CartService.createCart(userId, product);
+    await deleteCartRedis(userId);
+    return updateCart;
   }
 
   static async updateCart(userId: string, product: IProduct) {
@@ -110,10 +114,22 @@ class CartService {
   }
 
   static async getListUserCart(userId: string) {
-    return await CartModel.findOne({
+    const keyRedis = `cart_${userId}`;
+    const cacheData = await cachedRedisData(keyRedis);
+    if (cacheData) {
+      return cacheData;
+    }
+
+    const result = await CartModel.findOne({
       cart_userId: userId,
       cart_status: "active",
     }).lean();
+
+    if (!result) {
+      throw new BadRequestError("Cart not found!");
+    }
+    await setData(keyRedis, result);
+    return result;
   }
 }
 

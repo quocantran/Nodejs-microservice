@@ -28,6 +28,7 @@ export interface IDecoded {
 }
 
 export interface IProduct extends mongoose.Document {
+  product_id?: string;
   product_name: string;
   product_price: number;
   product_description?: string;
@@ -37,6 +38,8 @@ export interface IProduct extends mongoose.Document {
   product_attributes: Schema.Types.Mixed;
   product_shop: mongoose.Types.ObjectId;
   product_old_quantity?: number;
+  product_variations?: Array<any>;
+  sku_list: Array<any>;
 }
 
 export interface Inventory {

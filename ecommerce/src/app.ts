@@ -4,7 +4,8 @@ import helmet from "helmet";
 import instanceMongodb from "./dbs/init.mongodb";
 import dotenv from "dotenv";
 import router from "./routes";
-import { initElasticsearch } from "./dbs/init.elasticsearch";
+import { getClients, initElasticsearch } from "./dbs/init.elasticsearch";
+import elasticLogger from "./loggers/elastic.log";
 const app = express();
 
 //config middleware
@@ -34,13 +35,16 @@ app.use((req: Request, res: Response) => {
   throw error;
 });
 
-app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-  const statusCode = err.status || 500;
-  res.status(statusCode).json({
-    status: "error",
-    message: err.message || "Internal Server Error",
-    code: statusCode,
-  });
-});
+app.use(
+  async (err: HttpError, req: Request, res: Response, next: NextFunction) => {
+    const statusCode = err.status || 500;
+    await elasticLogger(err, statusCode);
+    res.status(statusCode).json({
+      status: "error",
+      message: err.message || "Internal Server Error",
+      code: statusCode,
+    });
+  }
+);
 
 export default app;

@@ -24,13 +24,14 @@ export const htmlTemplateEmail = () => {
           <a
             href=''
             style='font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600'
-          >Mã OTP lấy lại mật khẩu</a>
+          >Đăng ký thành viên</a>
         </div>
         <p style='font-size:1.1em'>Xin Chào!</p>
-        <p>Đây là mã OTP lấy lại mật khẩu của bạn (Có hiệu lực trong 3 phút)</p>
-        <h2
+        <p>Vui lòng nhấn vào link dưới đây để xác nhận thành viên</p>
+        <a
           style='background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;'
-        >{{otp}}</h2>
+          href='{{link_verify}}'
+        >Nhấn vào đây</a>
         <p style='font-size:0.9em;'>Trân Trọng!<br /></p>
         <hr style='border:none;border-top:1px solid #eee' />
 
@@ -38,4 +39,20 @@ export const htmlTemplateEmail = () => {
     </div>
   </body>
 </html>`;
+};
+
+export const replacePlaceHolder = (template: string, data: any) => {
+  Object.keys(data).forEach((key) => {
+    const placeholder = `{{${key}}}`;
+    template = template.replace(new RegExp(placeholder, "g"), data[key]);
+  });
+  return template;
+};
+
+export const randomProductId = () => {
+  return Math.floor(Math.random() * 1000000000000);
+};
+
+export const removeInfoData = ({ fileds = [], object = {} }) => {
+  return _.omit(object, fileds);
 };

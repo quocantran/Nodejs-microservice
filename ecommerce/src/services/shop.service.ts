@@ -30,5 +30,7 @@ export const findByShopId = async ({
   id: mongoose.Types.ObjectId | string;
   select?: any;
 }) => {
-  return await Shop.findOne({ _id: id }).select(select).lean();
+  return await Shop.findOne({ _id: id, status: "active" })
+    .select(select)
+    .lean();
 };

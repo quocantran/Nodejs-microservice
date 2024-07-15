@@ -2,6 +2,7 @@
 
 import crypto from "crypto";
 import Otp from "../models/otp.model";
+import { BadRequestError } from "../core/error.response";
 
 export default class OtpService {
   static newOtp = async ({ email = "" }) => {
@@ -17,5 +18,15 @@ export default class OtpService {
   static generatorTokenRandom = () => {
     const token = crypto.randomInt(0, Math.pow(2, 32));
     return token;
+  };
+
+  static checkToken = async ({ token = "" }) => {
+    const otp = await Otp.findOne({ otp_token: token }).lean();
+    if (!otp) {
+      throw new BadRequestError("Token not found!");
+    }
+
+    await Otp.deleteOne({ otp_token: token });
+    return otp;
   };
 }

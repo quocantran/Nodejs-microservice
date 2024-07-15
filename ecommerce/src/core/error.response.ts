@@ -1,5 +1,7 @@
 "use strict";
 
+import WinstonLogger from "../loggers/winston.log";
+
 const StatusCode = {
   FORBIDDEN: 403,
   UNAUTHORIZED: 401,
@@ -19,6 +21,15 @@ class ErrorResponse extends Error {
   constructor(message: string, status: number) {
     super(message);
     this.status = status;
+
+    WinstonLogger.error(message, [
+      "/api/v1/upload",
+      "10001",
+      {
+        error: message,
+        status: status,
+      },
+    ]);
   }
 }
 
